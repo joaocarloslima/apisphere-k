@@ -16,10 +16,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     public Token login(Credentials credentials){
@@ -29,16 +31,8 @@ public class AuthService {
         if ( !passwordEncoder.matches(credentials.password(), user.getPassword()) )
             throw new RuntimeException("Access Denied");
 
-        Algorithm algorithm = Algorithm.HMAC256("assinatura");
-        var expiresAt = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.ofHours(-3));
-        String token = JWT.create()
-                .withSubject(credentials.email())
-                .withIssuer("sphere")
-                .withExpiresAt(expiresAt)
-                .withClaim("role", "ADMIN")
-                .sign(algorithm);
+        return tokenService.createToken(credentials);
 
-        return new Token(token, credentials.email());
     }
 
 }
