@@ -59,6 +59,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } catch (Exception e) {
+            System.out.println(e);
             response.setStatus(403);
             response.addHeader("Content-Type", "application/json");
             response.getWriter().write("""
